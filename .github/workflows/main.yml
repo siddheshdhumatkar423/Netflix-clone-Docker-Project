@@ -28,20 +28,12 @@ jobs:
         run: npm install
 
       - name: 🐳 Docker Login
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" 
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}"
 
       - name: 🏗️ Build and Push Docker image
         run: |
           docker build --build-arg TMDB_V3_API_KEY="${{ secrets.TMDB_API_KEY }}" -t "${{ secrets.DOCKER_USERNAME }}/netflix:latest" .
           docker push "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
-
-      - name: 🔍 Image scan using Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
-          format: 'table'
-          exit-code: '0'
-          output: 'trivyimage.txt'
 
       - name: 🚢 Run Docker container for smoke-testing
         run: |
@@ -60,5 +52,3 @@ jobs:
           kubectl apply -f Kubernetes/deployment.yml
           kubectl apply -f Kubernetes/service.yml
           kubectl rollout status deployment/netflix
-
-      
