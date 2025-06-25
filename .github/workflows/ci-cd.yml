@@ -27,7 +27,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: aiworklabs/netflix:latest
+          tags: siddhesh776/netflix:latest
 
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
@@ -50,5 +50,5 @@ jobs:
       - name: Deploy with Helm
         run: |
           helm upgrade --install netflix-clone ./charts/netflix-clone \
-            --set image.repository=aiworklabs/netflix \
+            --set image.repository=siddhesh776/netflix \
             --set image.tag=latest
