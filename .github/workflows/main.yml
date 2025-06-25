@@ -1,4 +1,4 @@
-name: CI/CD Netflix Clone
+me: CI/CD Netflix Clone
 
 on:
   push:
@@ -45,12 +45,10 @@ jobs:
         wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
         unzip dependency-check-8.4.0-release.zip
         ./dependency-check/bin/dependency-check.sh --scan . --format XML
-
     - name: 🔐 Filesystem scan using Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
         ./trivy fs . > trivyfs.txt
-
     - name: 🐳 Docker Login
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
@@ -59,7 +57,6 @@ jobs:
       run: |
         docker build --build-arg TMDB_V3_API_KEY="${{ secrets.TMDB_API_KEY }}" -t "${{ secrets.DOCKER_USERNAME }}/netflix:latest" .
         docker push "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
-
     - name: 🔍 Image scan using Trivy
       run: ./trivy image "${{ secrets.DOCKER_USERNAME }}/netflix:latest" > trivyimage.txt
 
@@ -68,7 +65,6 @@ jobs:
         docker rm -f netflix || true
         docker run -d --name netflix -p 8081:80 "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
         # Optional health-check command here
-
     - name: ⚓ Deploy to Kubernetes
       env:
         KUBECONFIG: ${{ secrets.KUBECONFIG }}
@@ -79,7 +75,6 @@ jobs:
         kubectl apply -f Kubernetes/deployment.yml
         kubectl apply -f Kubernetes/service.yml
         kubectl rollout status deployment/netflix
-
     - name: 📧 Send email notification
       if: always()
       uses: dawidd6/action-send-mail@v4
@@ -97,4 +92,3 @@ jobs:
           View logs: ${{ github.run_url }}
         to: siddheshdhumatkar591@gmail.com
         from: GitHub Actions <no-reply@example.com>
-
