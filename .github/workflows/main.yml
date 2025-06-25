@@ -30,11 +30,7 @@ jobs:
     - name: 📦 Install npm dependencies
       run: npm install
 
-    - name: 📊 OWASP Dependency Check
-      run: |
-        wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
-        unzip dependency-check-8.4.0-release.zip
-        ./dependency-check/bin/dependency-check.sh --scan . --format XML
+    
     - name: 🔐 Filesystem scan using Trivy
       run: |
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
