@@ -1,4 +1,4 @@
-me: CI/CD Netflix Clone
+name: CI/CD Netflix Clone
 
 on:
   push:
