@@ -28,22 +28,26 @@ jobs:
         run: npm install
 
       - name: 🐳 Docker Login
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}"
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: 🏗️ Build and Push Docker image
-        shell: bash
         run: |
           docker build --build-arg TMDB_V3_API_KEY="${{ secrets.TMDB_API_KEY }}" -t "${{ secrets.DOCKER_USERNAME }}/netflix:latest" .
           docker push "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
 
       - name: 🔍 Image scan using Trivy
-        run: ./trivy image "${{ secrets.DOCKER_USERNAME }}/netflix:latest" > trivyimage.txt
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
+          format: 'table'
+          exit-code: '0'
+          output: 'trivyimage.txt'
 
       - name: 🚢 Run Docker container for smoke-testing
         run: |
           docker rm -f netflix || true
           docker run -d --name netflix -p 8081:80 "${{ secrets.DOCKER_USERNAME }}/netflix:latest"
-          # Optional health-check command here
+          # Add curl health check if needed
 
       - name: ⚓ Deploy to Kubernetes
         env:
@@ -66,10 +70,10 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Netflix Clone Build – ${{ job.status }}
           body: |
-            Project: ${{ github.repository }}
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            Status: ${{ job.status }}
-            View logs: ${{ github.run_url }}
+            ✅ Project: ${{ github.repository }}
+            🔀 Branch: ${{ github.ref_name }}
+            🔖 Commit: ${{ github.sha }}
+            📦 Status: ${{ job.status }}
+            📄 Logs: ${{ github.run_url }}
           to: siddheshdhumatkar591@gmail.com
           from: GitHub Actions <no-reply@example.com>
